@@ -559,4 +559,647 @@
                 <div class="bar"><i id="ms-bar"></i></div>
               </div>
 
-              <button cl
+              <button class="btn" style="margin-top:12px" id="msComplete" type="button" disabled>Concluir missão</button>
+              <div class="note" style="margin-top:10px">Regra: só conclui quando todas as tarefas estiverem marcadas.</div>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <!-- WORKOUTS -->
+      <section class="page" id="page-workouts">
+        <section class="panel pad-lg">
+          <div class="sectionK"><span class="dot">≡</span><span>Treinos em casa</span></div>
+          <div class="note" style="margin-top:10px">Peso do corpo por padrão. Mochila e elástico são opcionais. Sem supino, sem máquinas.</div>
+
+          <div class="wcards" id="workoutCards"></div>
+
+          <div id="workoutDetail" style="margin-top:12px; display:none">
+            <section class="panel pad-lg" style="background:rgba(0,0,0,.14); box-shadow:none">
+              <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start">
+                <div>
+                  <div class="stamp">Plano selecionado</div>
+                  <div class="pageTitle" style="font-size:18px" id="wdTitle"></div>
+                  <div class="pageSub" style="font-size:12px" id="wdSub"></div>
+                </div>
+                <button class="btn ghost" id="wdClose" type="button">Fechar</button>
+              </div>
+
+              <div style="display:grid;gap:10px;margin-top:12px" id="workoutExercises"></div>
+              <div class="note" style="margin-top:10px">Se “remada com toalha/mesa” não for estável, substitua por “Superman + Y-T-W” e “Rosca com mochila”.</div>
+            </section>
+          </div>
+        </section>
+      </section>
+
+      <!-- CHECKIN -->
+      <section class="page" id="page-checkin">
+        <section class="panel pad-lg">
+          <div class="sectionK"><span class="dot">⌁</span><span>Check-in semanal</span></div>
+          <div class="note" style="margin-top:10px" id="ckNote"></div>
+
+          <div class="grid cols3" style="margin-top:12px">
+            <div class="kpi"><div class="k">Rank previsto</div><div class="v" id="ckRank"></div></div>
+            <div class="kpi"><div class="k">Score</div><div class="v" id="ckScore"></div></div>
+            <div class="kpi"><div class="k">Disciplina</div><div class="v" id="ckDisc"></div></div>
+          </div>
+
+          <div class="fields">
+            <div class="field">
+              <label>Nome</label>
+              <input id="fName" autocomplete="off" />
+            </div>
+            <div class="field">
+              <label>Nível</label>
+              <select id="fLevel">
+                <option value="iniciante">Iniciante</option>
+                <option value="intermediario">Intermediário</option>
+                <option value="avancado">Avançado</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label>Flexões (máx reps)</label>
+              <input id="fPush" type="number" min="0" />
+            </div>
+            <div class="field">
+              <label>Agachamentos (máx reps)</label>
+              <input id="fSquat" type="number" min="0" />
+            </div>
+
+            <div class="field">
+              <label>Prancha (segundos)</label>
+              <input id="fPlank" type="number" min="0" />
+            </div>
+            <div class="field">
+              <label>Cardio contínuo (min)</label>
+              <input id="fCardio" type="number" min="0" />
+            </div>
+
+            <div class="field">
+              <label>Aderência semanal (0–100)</label>
+              <input id="fAdh" type="number" min="0" max="100" />
+            </div>
+            <div class="field">
+              <label>Notas</label>
+              <textarea id="fNotes" placeholder="Opcional"></textarea>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+            <button class="btn" id="btnSave" type="button" disabled>Salvar check-in</button>
+            <button class="btn ghost" id="btnBack" type="button">Voltar</button>
+          </div>
+
+          <div class="note" style="margin-top:10px">Score: 70% performance (testes), 30% aderência.</div>
+
+          <div class="hist" id="hist"></div>
+        </section>
+      </section>
+
+      <!-- WIDGET -->
+      <section class="page" id="page-widget">
+        <section class="panel pad-lg">
+          <div class="sectionK"><span class="dot">▦</span><span>Widget</span></div>
+          <div class="note" style="margin-top:10px">Mini sistema pronto para embutir em outras páginas.</div>
+
+          <div style="margin-top:12px" class="widgetBox">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+              <div>
+                <div class="stamp" id="wDay"></div>
+                <div style="margin-top:6px;font-size:14px;font-weight:900" id="wEnergy"></div>
+              </div>
+              <div class="pill" style="min-width:140px">
+                <div class="k">Rank</div>
+                <div class="v" id="wRank"></div>
+              </div>
+            </div>
+
+            <div style="margin-top:12px">
+              <div class="bar"><i id="wEnergyBar"></i></div>
+              <div class="barLine" style="margin-top:10px">
+                <div class="l">Missão diária</div>
+                <div class="r" id="wPct"></div>
+              </div>
+            </div>
+
+            <div style="margin-top:12px;display:grid;gap:8px" id="wList"></div>
+
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+              <button class="btn" id="wComplete" type="button" disabled>Concluir</button>
+              <button class="btn ghost" id="wCheckin" type="button">Check-in</button>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <div class="footer">Não é um jogo. É um sistema pessoal de disciplina e evolução.</div>
+    </main>
+  </div>
+
+  <script>
+    // SINGLE-FILE APP (no build, no dependencies)
+    document.addEventListener("DOMContentLoaded", () => {
+      const LS = "solo_evolution_singlefile_v2";
+      const clamp = (n,min,max)=>Math.max(min,Math.min(max,n));
+      const daysBetween = (a,b)=>Math.floor(Math.abs(a-b)/(1000*60*60*24));
+      const RANKS = ["E","D","C","B","A","S","SS","SSS"];
+
+      const defaultState = {
+        ui: { tab: "dash" },
+        user: { name: "Usuário" },
+        meta: { day: 1, lastCheckinAt: null },
+        resources: { energy: 78, discipline: 38 },
+        derived: { rank: "E", score: 0 },
+        stats: { strength: 20, endurance: 20, agility: 18, vitality: 18 },
+        missions: {
+          items: [
+            { id:"workout", label:"Treino do dia", done:false },
+            { id:"water", label:"Hidratação (2L)", done:false },
+            { id:"nutrition", label:"Alimentação alinhada", done:false },
+            { id:"sleep", label:"Sono (7–8h)", done:false }
+          ]
+        },
+        workouts: {
+          activeId: null,
+          items: [
+            { id:"A", title:"Treino A", subtitle:"Parte superior (casa)", plan:[
+              { name:"Flexão (variação adequada)", sets:"4× AMRAP", note:"Pare 1–2 reps antes da falha" },
+              { name:"Flexão inclinada/declinada", sets:"3× 8–15", note:"Ajuste a dificuldade" },
+              { name:"Pike push-up", sets:"4× 6–12", note:"Ombros + core firme" },
+              { name:"Tríceps no banco/cadeira", sets:"3× 8–15", note:"Ombros estáveis" },
+              { name:"Prancha com toque no ombro", sets:"3× 20–40s", note:"Sem girar o quadril" }
+            ]},
+            { id:"B", title:"Treino B", subtitle:"Costas / bíceps (casa)", plan:[
+              { name:"Remada com toalha/mesa", sets:"4× 8–12", note:"Se não for seguro, substitua" },
+              { name:"Superman", sets:"4× 12–20", note:"Contração total" },
+              { name:"Y-T-W no chão", sets:"3× 10–12", note:"Escápulas firmes" },
+              { name:"Rosca com mochila", sets:"3× 8–12", note:"Progressão por carga (livros)" },
+              { name:"Dead bug", sets:"3× 8–12/lado", note:"Core" }
+            ]},
+            { id:"C", title:"Treino C", subtitle:"Pernas / core (casa)", plan:[
+              { name:"Agachamento", sets:"4× 12–20", note:"Cadência + amplitude" },
+              { name:"Avanço (lunge)", sets:"3× 10–14/lado", note:"Controle" },
+              { name:"Elevação pélvica", sets:"4× 10–20", note:"Pausa no topo" },
+              { name:"Panturrilha", sets:"4× 12–20", note:"Pico" },
+              { name:"Prancha", sets:"3× 45–75s", note:"Respiração" },
+              { name:"Wall sit", sets:"2× 45–90s", note:"Resistência" }
+            ]}
+          ]
+        },
+        checkins: []
+      };
+
+      function load(){
+        try{
+          const raw = localStorage.getItem(LS);
+          if(!raw) return structuredClone(defaultState);
+          const p = JSON.parse(raw);
+          return {
+            ...structuredClone(defaultState),
+            ...p,
+            user:{...defaultState.user, ...(p.user||{})},
+            meta:{...defaultState.meta, ...(p.meta||{})},
+            resources:{...defaultState.resources, ...(p.resources||{})},
+            derived:{...defaultState.derived, ...(p.derived||{})},
+            stats:{...defaultState.stats, ...(p.stats||{})},
+            missions:{ items: (p.missions?.items||defaultState.missions.items).map(x=>({id:x.id,label:x.label,done:!!x.done}))},
+            workouts:{...defaultState.workouts, ...(p.workouts||{})},
+            checkins: Array.isArray(p.checkins) ? p.checkins : []
+          };
+        }catch{
+          return structuredClone(defaultState);
+        }
+      }
+      function save(){ localStorage.setItem(LS, JSON.stringify(state)); }
+
+      let state = load();
+
+      // ---------------- rules
+      function rankFromScore(score){
+        const s = clamp(score,0,100);
+        const idx = clamp(Math.floor(s/12.5),0,RANKS.length-1);
+        return RANKS[idx];
+      }
+      function disciplineFromAdherence(adh){
+        return clamp(Math.round(20 + (clamp(adh,0,100)*80)/100), 0, 100);
+      }
+      function scoreFromTests(t, adh){
+        const push = clamp((t.pushups/60)*100,0,100);
+        const squat = clamp((t.squats/120)*100,0,100);
+        const plank = clamp((t.plankSec/240)*100,0,100);
+        const cardio = clamp((t.cardioMin/60)*100,0,100);
+        const perf = (push+squat+plank+cardio)/4;
+        return Math.round(perf*0.7 + clamp(adh,0,100)*0.3);
+      }
+      function statsFromTests(t){
+        const strength = Math.round(10 + clamp((t.pushups/60)*50,0,50));
+        const endurance = Math.round(10 + clamp((t.squats/120)*50,0,50));
+        const vitality = Math.round(10 + clamp((t.plankSec/240)*50,0,50));
+        const agility = Math.round(10 + clamp((t.cardioMin/60)*50,0,50));
+        return { strength, endurance, agility, vitality };
+      }
+      function weeklyDue(lastAt){
+        if(!lastAt) return true;
+        return daysBetween(Date.now(), lastAt) >= 7;
+      }
+
+      // ---------------- helpers
+      const $ = (id)=>document.getElementById(id);
+      const pages = ["dash","mission","workouts","checkin","widget"];
+      function todayStamp(){
+        const d=new Date();
+        const days=["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
+        const months=["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
+        const dd=String(d.getDate()).padStart(2,"0");
+        return `${days[d.getDay()]} • ${dd} ${months[d.getMonth()]} ${d.getFullYear()}`;
+      }
+      function formatDate(ts){
+        const d=new Date(ts);
+        return `${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${d.getFullYear()}`;
+      }
+
+      // ---------------- navigation
+      function setTab(tab){
+        state.ui.tab = tab;
+        save();
+        render();
+        window.scrollTo({top:0, behavior:"smooth"});
+      }
+
+      // ---------------- missions
+      function missionDoneCount(){ return state.missions.items.filter(x=>x.done).length; }
+      function missionPct(){ return Math.round((missionDoneCount()/state.missions.items.length)*100); }
+      function canComplete(){ return state.missions.items.every(x=>x.done); }
+
+      function toggleMission(id){
+        const it = state.missions.items.find(x=>x.id===id);
+        if(!it) return;
+        it.done = !it.done;
+        save();
+        render();
+      }
+
+      function completeMission(){
+        if(!canComplete()) return;
+        state.meta.day += 1;
+        state.resources.energy = clamp(state.resources.energy + 18, 0, 100);
+        state.resources.discipline = clamp(state.resources.discipline + 6, 0, 100);
+        state.missions.items.forEach(x=>x.done=false);
+        save();
+        render();
+      }
+
+      // ---------------- workouts
+      function selectWorkout(id){
+        state.workouts.activeId = id;
+        save();
+        renderWorkouts();
+      }
+      function closeWorkout(){
+        state.workouts.activeId = null;
+        save();
+        renderWorkouts();
+      }
+
+      // ---------------- checkin
+      function readCheckin(){
+        const tests = {
+          pushups: Math.max(0, Number($("fPush").value||0)),
+          squats: Math.max(0, Number($("fSquat").value||0)),
+          plankSec: Math.max(0, Number($("fPlank").value||0)),
+          cardioMin: Math.max(0, Number($("fCardio").value||0))
+        };
+        const adherencePct = clamp(Number($("fAdh").value||0), 0, 100);
+        const score = scoreFromTests(tests, adherencePct);
+        const rank = rankFromScore(score);
+        const discipline = disciplineFromAdherence(adherencePct);
+        const stats = statsFromTests(tests);
+
+        return {
+          name: String($("fName").value||"").trim(),
+          level: $("fLevel").value,
+          notes: String($("fNotes").value||"").trim(),
+          adherencePct,
+          tests,
+          derived: { score, rank, discipline, stats }
+        };
+      }
+
+      function saveCheckin(){
+        const c = readCheckin();
+        if(!c.name) return;
+
+        const payload = {
+          id: String(Date.now()) + Math.random().toString(16).slice(2),
+          createdAt: Date.now(),
+          name: c.name,
+          level: c.level,
+          adherencePct: c.adherencePct,
+          tests: c.tests,
+          notes: c.notes,
+          derived: c.derived
+        };
+
+        state.user.name = c.name;
+        state.meta.lastCheckinAt = payload.createdAt;
+        state.derived.rank = c.derived.rank;
+        state.derived.score = c.derived.score;
+        state.resources.discipline = c.derived.discipline;
+        state.stats = c.derived.stats;
+
+        state.checkins = [payload, ...state.checkins].slice(0, 52);
+        save();
+        setTab("dash");
+      }
+
+      // ---------------- rendering
+      function renderHeader(){
+        $("stamp").textContent = todayStamp();
+        const tab = state.ui.tab;
+
+        const map = {
+          dash: ["Dashboard","Não é um jogo. É um sistema pessoal de disciplina e evolução."],
+          mission: ["Missão diária","Consistência antes de intensidade."],
+          workouts: ["Treinos","Em casa. Execução limpa. Progresso real."],
+          checkin: ["Check-in semanal","Atualiza rank e registra evolução semanal."],
+          widget: ["Widget","Mini sistema embutível."]
+        };
+        $("pageTitle").textContent = map[tab][0];
+        $("pageSub").textContent = map[tab][1];
+
+        // pending label
+        $("checkinLabel").textContent = weeklyDue(state.meta.lastCheckinAt) ? "Check-in (pendente)" : "Check-in";
+      }
+
+      function renderTabs(){
+        const tab = state.ui.tab;
+
+        // nav aria-selected
+        document.querySelectorAll("#nav button").forEach(b=>{
+          const selected = b.dataset.tab === tab;
+          b.setAttribute("aria-selected", selected ? "true" : "false");
+        });
+
+        // pages show/hide
+        pages.forEach(p=>{
+          $("page-"+p).classList.toggle("active", p===tab);
+        });
+      }
+
+      function renderSidebar(){
+        $("sideName").textContent = state.user.name;
+        $("sideRank").textContent = state.derived.rank;
+      }
+
+      function renderDash(){
+        $("dashName").textContent = state.user.name;
+        $("dashDay").textContent = String(state.meta.day);
+        $("dashRank").textContent = state.derived.rank;
+
+        $("dashDisc").textContent = state.resources.discipline + "%";
+        $("dashScore").textContent = String(state.derived.score);
+
+        $("dashEnergyText").textContent = state.resources.energy + "%";
+        $("dashDiscText").textContent = state.resources.discipline + "%";
+        $("barEnergy").style.width = state.resources.energy + "%";
+        $("barDisc").style.width = state.resources.discipline + "%";
+
+        $("stStrength").textContent = String(state.stats.strength);
+        $("stEndurance").textContent = String(state.stats.endurance);
+        $("stAgility").textContent = String(state.stats.agility);
+        $("stVitality").textContent = String(state.stats.vitality);
+
+        $("dashCheckins").textContent = String(state.checkins.length);
+        const latest = state.checkins[0] || null;
+        const prev = state.checkins[1] || null;
+        const delta = (latest && prev) ? (latest.derived.score - prev.derived.score) : null;
+        $("dashDelta").textContent = delta===null ? "—" : (delta>=0 ? "+"+delta : String(delta));
+
+        $("btnComplete").disabled = !canComplete();
+      }
+
+      function renderMission(){
+        $("msDay").textContent = String(state.meta.day);
+        $("msEnergy").textContent = state.resources.energy + "%";
+        $("msDisc").textContent = state.resources.discipline + "%";
+
+        const list = $("taskList");
+        list.innerHTML = "";
+
+        state.missions.items.forEach(it=>{
+          const row = document.createElement("div");
+          row.className = "task" + (it.done ? " done" : "");
+          row.innerHTML = `
+            <div class="left">
+              <div class="chk"><i></i></div>
+              <div class="label">${it.label}</div>
+            </div>
+            <div class="status">${it.done ? "Concluída" : "Pendente"}</div>
+          `;
+          row.addEventListener("click", ()=> toggleMission(it.id));
+          list.appendChild(row);
+        });
+
+        const pct = missionPct();
+        $("msPct").textContent = pct + "%";
+        $("msBar").style.width = pct + "%";
+        $("msComplete").disabled = !canComplete();
+      }
+
+      function renderWorkouts(){
+        const cards = $("workoutCards");
+        cards.innerHTML = "";
+
+        state.workouts.items.forEach(w=>{
+          const b = document.createElement("button");
+          b.className = "wcard" + (state.workouts.activeId===w.id ? " active" : "");
+          b.type = "button";
+          b.innerHTML = `
+            <div class="t">${w.title}</div>
+            <div class="s">${w.subtitle}</div>
+            <div class="d">${w.plan.length} exercícios • foco em qualidade</div>
+          `;
+          b.addEventListener("click", ()=> selectWorkout(w.id));
+          cards.appendChild(b);
+        });
+
+        const detail = $("workoutDetail");
+        const active = state.workouts.items.find(x=>x.id===state.workouts.activeId) || null;
+
+        if(!active){
+          detail.style.display = "none";
+          return;
+        }
+
+        detail.style.display = "block";
+        $("wdTitle").textContent = `${active.title} — ${active.subtitle}`;
+        $("wdSub").textContent = "Progrida com reps, tempo sob tensão ou carga (mochila). Execução limpa.";
+
+        const box = $("workoutExercises");
+        box.innerHTML = "";
+        active.plan.forEach(ex=>{
+          const row = document.createElement("div");
+          row.className = "ex";
+          row.innerHTML = `
+            <div>
+              <div class="nm">${ex.name}</div>
+              <div class="nt">${ex.note}</div>
+            </div>
+            <div>
+              <div class="k">Séries</div>
+              <div class="v">${ex.sets}</div>
+            </div>
+            <div>
+              <div class="k">Status</div>
+              <div class="v">Pronto</div>
+            </div>
+          `;
+          box.appendChild(row);
+        });
+
+        $("wdClose").onclick = closeWorkout;
+      }
+
+      function renderCheckin(){
+        const due = weeklyDue(state.meta.lastCheckinAt);
+        const lastDays = state.meta.lastCheckinAt ? daysBetween(Date.now(), state.meta.lastCheckinAt) : null;
+
+        $("ckNote").textContent = state.meta.lastCheckinAt
+          ? (due ? `Pendente: último check-in há ${lastDays} dias.` : `Último check-in há ${lastDays} dias.`)
+          : "Primeiro check-in: defina seu ponto de partida.";
+
+        // Prefill (somente se estiver vazio)
+        if(!$("fName").value) $("fName").value = (state.checkins[0]?.name || state.user.name || "Usuário");
+        if(!$("fLevel").value) $("fLevel").value = (state.checkins[0]?.level || "iniciante");
+        if(!$("fAdh").value) $("fAdh").value = String(state.checkins[0]?.adherencePct ?? 0);
+        if(!$("fPush").value) $("fPush").value = String(state.checkins[0]?.tests?.pushups ?? 0);
+        if(!$("fSquat").value) $("fSquat").value = String(state.checkins[0]?.tests?.squats ?? 0);
+        if(!$("fPlank").value) $("fPlank").value = String(state.checkins[0]?.tests?.plankSec ?? 0);
+        if(!$("fCardio").value) $("fCardio").value = String(state.checkins[0]?.tests?.cardioMin ?? 0);
+
+        const c = readCheckin();
+        $("ckRank").textContent = c.derived.rank;
+        $("ckScore").textContent = String(c.derived.score);
+        $("ckDisc").textContent = c.derived.discipline + "%";
+        $("btnSave").disabled = !c.name;
+
+        // history
+        const hist = $("hist");
+        hist.innerHTML = "";
+        state.checkins.slice(0,18).forEach(ci=>{
+          const el = document.createElement("div");
+          el.className = "hitem";
+          el.innerHTML = `
+            <div>
+              <div class="wk">${formatDate(ci.createdAt)}</div>
+              <div class="sc">Rank ${ci.derived.rank} • Score ${ci.derived.score}</div>
+              <div class="sm">Flexões ${ci.tests.pushups} • Agach ${ci.tests.squats} • Prancha ${ci.tests.plankSec}s • Cardio ${ci.tests.cardioMin}m</div>
+            </div>
+            <div style="text-align:right">
+              <div class="wk">Disciplina</div>
+              <div class="sc">${ci.derived.discipline}%</div>
+            </div>
+          `;
+          hist.appendChild(el);
+        });
+      }
+
+      function renderWidget(){
+        $("wDay").textContent = "Dia " + state.meta.day;
+        $("wEnergy").textContent = "Energia " + state.resources.energy + "%";
+        $("wRank").textContent = state.derived.rank;
+        $("wEnergyBar").style.width = state.resources.energy + "%";
+
+        const pct = missionPct();
+        $("wPct").textContent = pct + "%";
+
+        const list = $("wList");
+        list.innerHTML = "";
+        state.missions.items.slice(0,3).forEach(it=>{
+          const row = document.createElement("div");
+          row.className = "task" + (it.done ? " done" : "");
+          row.innerHTML = `
+            <div class="left">
+              <div class="chk"><i></i></div>
+              <div>
+                <div class="label" style="font-size:12px">${it.label}</div>
+                <div class="status">${it.done ? "OK" : "Pendente"}</div>
+              </div>
+            </div>
+            <div class="status">${it.done ? "1" : "0"}</div>
+          `;
+          row.addEventListener("click", ()=> toggleMission(it.id));
+          list.appendChild(row);
+        });
+
+        $("wComplete").disabled = !canComplete();
+        $("wCheckin").textContent = weeklyDue(state.meta.lastCheckinAt) ? "Check-in" : "Revisar";
+      }
+
+      function render(){
+        renderHeader();
+        renderTabs();
+        renderSidebar();
+        renderDash();
+        renderMission();
+        renderWorkouts();
+        renderCheckin();
+        renderWidget();
+
+        // onboarding: sem check-in → abre checkin
+        if(state.checkins.length === 0 && state.ui.tab !== "checkin"){
+          setTab("checkin");
+        }
+      }
+
+      // ---------------- wire events (only once)
+      document.querySelectorAll("#nav button").forEach(btn=>{
+        btn.addEventListener("click", () => setTab(btn.dataset.tab));
+      });
+
+      $("btnEditName").addEventListener("click", ()=>{
+        const next = prompt("Nome do usuário:", state.user.name);
+        if(!next) return;
+        state.user.name = next.trim() || state.user.name;
+        save(); render();
+      });
+
+      $("btnReset").addEventListener("click", ()=>{
+        if(!confirm("Resetar progresso local?")) return;
+        localStorage.removeItem(LS);
+        state = load();
+        render();
+      });
+
+      $("btnBoost").addEventListener("click", ()=>{
+        state.resources.energy = clamp(state.resources.energy + 5, 0, 100);
+        save(); render();
+      });
+      $("btnEffort").addEventListener("click", ()=>{
+        state.resources.energy = clamp(state.resources.energy - 5, 0, 100);
+        save(); render();
+      });
+
+      $("btnGoCheckin").addEventListener("click", ()=> setTab("checkin"));
+      $("btnComplete").addEventListener("click", completeMission);
+      $("msComplete").addEventListener("click", completeMission);
+
+      $("btnSave").addEventListener("click", saveCheckin);
+      $("btnBack").addEventListener("click", ()=> setTab("dash"));
+
+      $("wComplete").addEventListener("click", completeMission);
+      $("wCheckin").addEventListener("click", ()=> setTab("checkin"));
+
+      // live compute check-in
+      ["fName","fLevel","fPush","fSquat","fPlank","fCardio","fAdh","fNotes"].forEach(id=>{
+        $(id).addEventListener("input", ()=> renderCheckin());
+        $(id).addEventListener("change", ()=> renderCheckin());
+      });
+
+      // Init
+      render();
+    });
+  </script>
+</body>
+</html>
