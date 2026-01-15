@@ -1,360 +1,365 @@
 <!doctype html>
 <html lang="pt-BR">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>Sistema de Evolução</title>
 
   <style>
     :root{
-      --bg:#0b0c0f;
-      --bg2:#0f1117;
-      --card:rgba(255,255,255,.04);
-      --card2:rgba(255,255,255,.06);
-      --border:rgba(255,255,255,.10);
-      --border2:rgba(255,255,255,.14);
-      --text:rgba(255,255,255,.90);
-      --muted:rgba(255,255,255,.56);
-      --muted2:rgba(255,255,255,.40);
-      --shadow: 0 16px 60px rgba(0,0,0,.55);
-      --ring: 0 0 0 2px rgba(255,255,255,.10);
-      --radius: 18px;
-      --radius2: 22px;
+      --bg0:#03050a;
+      --bg1:#060a12;
+      --panel: rgba(8,12,22,.78);
+      --panel2: rgba(10,16,30,.66);
+      --line: rgba(120,180,255,.18);
+      --line2: rgba(150,220,255,.28);
+      --text: rgba(235,245,255,.92);
+      --muted: rgba(235,245,255,.60);
+      --muted2: rgba(235,245,255,.42);
+      --accent: rgba(127,199,255,.90);
+      --ok: rgba(72,255,154,.85);
+      --warn: rgba(255,190,90,.92);
+      --danger: rgba(255,90,110,.92);
+      --radius: 14px;
+      --radius2: 16px;
       --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
-      --speed: 180ms;
+      --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial;
+      --shadow: 0 18px 70px rgba(0,0,0,.55);
+      --speed: 160ms;
     }
 
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
       margin:0;
-      font-family:var(--font);
-      background: radial-gradient(900px 460px at 18% 8%, rgba(255,255,255,.08), transparent 60%),
-                  radial-gradient(900px 460px at 82% 18%, rgba(255,255,255,.06), transparent 60%),
-                  linear-gradient(to bottom, rgba(255,255,255,.05), transparent 35%),
-                  var(--bg);
+      font-family:var(--sans);
       color:var(--text);
+      background:
+        radial-gradient(1100px 620px at 16% 10%, rgba(127,199,255,.12), transparent 62%),
+        radial-gradient(1100px 620px at 82% 18%, rgba(169,240,255,.10), transparent 62%),
+        linear-gradient(to bottom, rgba(255,255,255,.03), transparent 34%),
+        var(--bg0);
+    }
+
+    /* Fundo HUD (SEM SOBREPOR o conteúdo) */
+    .bg-grid{
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      background:
+        linear-gradient(rgba(127,199,255,.06) 1px, transparent 1px) 0 0 / 44px 44px,
+        linear-gradient(90deg, rgba(127,199,255,.04) 1px, transparent 1px) 0 0 / 44px 44px;
+      opacity:.18;
+      filter: blur(.2px);
     }
 
     .app{
-      max-width:1180px;
-      margin:0 auto;
-      padding:22px 18px 26px;
-      display:grid;
-      grid-template-columns: 310px 1fr;
-      gap:18px;
-      min-height:100%;
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 18px 14px 28px;
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 14px;
+      min-height: 100%;
     }
-
     @media (max-width: 980px){
-      .app{grid-template-columns:1fr}
-      .sidebar{position:sticky; top:12px}
+      .app{grid-template-columns: 1fr}
     }
 
-    .sidebar{
-      display:flex;
-      flex-direction:column;
-      gap:14px;
+    .panel{
+      background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
+      border: 1px solid var(--line);
+      border-radius: var(--radius2);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
+      overflow: hidden;
+      position: relative;
     }
 
-    .surface{
-      background: var(--card);
-      border:1px solid var(--border);
-      border-radius:var(--radius2);
-      box-shadow: 0 0 0 1px rgba(255,255,255,.03);
-      overflow:hidden;
+    /* cantos HUD */
+    .panel:before,.panel:after{
+      content:"";
+      position:absolute;
+      width:18px;height:18px;
+      border:1px solid rgba(127,199,255,.34);
+      opacity:.9;
+      pointer-events:none;
     }
+    .panel:before{top:10px;left:10px;border-right:none;border-bottom:none;border-top-left-radius:10px}
+    .panel:after{bottom:10px;right:10px;border-left:none;border-top:none;border-bottom-right-radius:10px}
 
-    .pad{padding:16px}
-    .pad-lg{padding:18px}
+    .pad{padding: 14px}
+    .pad-lg{padding: 16px}
 
+    /* Sidebar */
     .brand{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
     }
-    .brand .t1{font-size:12px; text-transform:uppercase; letter-spacing:.14em; color:var(--muted)}
-    .brand .t2{margin-top:6px; font-size:18px; font-weight:650; letter-spacing:-.02em}
-    .brand .sig{
-      width:44px; height:44px;
-      border-radius:16px;
-      border:1px solid var(--border);
-      background: rgba(255,255,255,.04);
-      display:grid; place-items:center;
-      box-shadow: var(--ring);
+    .brand .kicker{
+      font-family:var(--mono);
+      font-size:11px;
+      letter-spacing:.18em;
+      text-transform:uppercase;
+      color:var(--muted2);
+    }
+    .brand .title{
+      margin-top:6px;
+      font-size:18px;
+      font-weight:860;
+      letter-spacing:-.02em;
+    }
+    .sig{
+      width:50px;height:50px;border-radius:16px;
+      border:1px solid var(--line2);
+      background:
+        radial-gradient(18px 18px at 35% 35%, rgba(169,240,255,.22), transparent 70%),
+        rgba(0,0,0,.18);
+      box-shadow: 0 0 0 2px rgba(127,199,255,.07), 0 0 22px rgba(127,199,255,.14);
+      position:relative;
+      flex:0 0 auto;
     }
     .sig:before{
       content:"";
-      width:14px; height:14px;
+      position:absolute; inset: 12px;
       border-radius:999px;
-      border:1px solid rgba(255,255,255,.22);
-      box-shadow: 0 0 0 3px rgba(255,255,255,.04);
-      display:block;
+      border:1px solid rgba(127,199,255,.38);
+      box-shadow:0 0 0 3px rgba(127,199,255,.08);
     }
 
     .nav{
-      display:flex; flex-direction:column; gap:10px;
       margin-top:12px;
+      display:grid;
+      gap:10px;
     }
-
     .nav button{
       all:unset;
       cursor:pointer;
+      user-select:none;
       display:flex;
       gap:12px;
       align-items:center;
-      padding:12px 12px;
+      padding:12px;
       border-radius:16px;
       border:1px solid transparent;
-      transition: background var(--speed), border-color var(--speed), transform var(--speed);
+      transition: background var(--speed), border-color var(--speed), box-shadow var(--speed);
     }
     .nav button:hover{
-      background: rgba(255,255,255,.03);
-      border-color: rgba(255,255,255,.08);
+      background: rgba(127,199,255,.05);
+      border-color: rgba(127,199,255,.12);
     }
     .nav button.active{
-      background: rgba(255,255,255,.06);
-      border-color: rgba(255,255,255,.12);
+      background: rgba(127,199,255,.10);
+      border-color: rgba(169,240,255,.22);
+      box-shadow: 0 0 0 2px rgba(127,199,255,.08);
     }
     .ic{
-      width:40px; height:40px;
-      border-radius:16px;
-      border:1px solid var(--border);
-      background: rgba(255,255,255,.03);
-      display:grid; place-items:center;
+      width:40px;height:40px;border-radius:16px;
+      border:1px solid rgba(127,199,255,.18);
+      background: rgba(0,0,0,.24);
+      display:grid;place-items:center;
       flex:0 0 auto;
     }
-    .ic svg{opacity:.9}
-    .nav .meta{display:flex; flex-direction:column; min-width:0}
-    .nav .meta .l1{font-size:14px; font-weight:600; color:rgba(255,255,255,.90); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-    .nav .meta .l2{font-size:12px; color:var(--muted); margin-top:2px}
+    .nav .t1{font-size:14px;font-weight:760}
+    .nav .t2{margin-top:2px;font-size:12px;color:var(--muted)}
 
-    .identity{
-      display:grid;
-      gap:10px;
-      margin-top:12px;
+    .sectionK{
+      display:flex;align-items:center;gap:10px;
+      font-family:var(--mono);
+      font-size:11px;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+      color:var(--muted2);
     }
+    .dot{
+      width:30px;height:30px;border-radius:16px;
+      border:1px solid rgba(127,199,255,.18);
+      background: rgba(0,0,0,.22);
+      display:grid;place-items:center;
+    }
+
     .pill{
-      border:1px solid var(--border);
-      background: rgba(0,0,0,.18);
+      border:1px solid rgba(127,199,255,.16);
+      background: rgba(0,0,0,.22);
       border-radius:16px;
       padding:12px;
     }
-    .pill .k{font-size:12px; color:var(--muted)}
-    .pill .v{margin-top:6px; font-size:14px; font-weight:600}
-    .row{display:flex; gap:10px; flex-wrap:wrap}
+    .pill .k{
+      font-family:var(--mono);
+      font-size:11px;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      color:var(--muted2);
+    }
+    .pill .v{
+      margin-top:6px;
+      font-size:14px;
+      font-weight:760;
+    }
 
     .btn{
       all:unset;
       cursor:pointer;
+      user-select:none;
       display:inline-flex;
       align-items:center;
       justify-content:center;
       gap:10px;
       padding:10px 12px;
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,.14);
-      background: rgba(255,255,255,.08);
-      color:rgba(255,255,255,.92);
+      border-radius:16px;
+      border:1px solid rgba(127,199,255,.18);
+      background: rgba(127,199,255,.08);
+      color: rgba(235,245,255,.92);
       font-size:13px;
-      font-weight:600;
-      transition: transform var(--speed), background var(--speed), border-color var(--speed), opacity var(--speed);
-      user-select:none;
+      font-weight:780;
+      transition: background var(--speed), border-color var(--speed), transform var(--speed);
     }
-    .btn:hover{background: rgba(255,255,255,.11); border-color: rgba(255,255,255,.18)}
+    .btn:hover{background: rgba(127,199,255,.12); border-color: rgba(127,199,255,.26)}
     .btn:active{transform: translateY(1px)}
-    .btn.ghost{background: transparent; border-color: rgba(255,255,255,.10); color: rgba(255,255,255,.80)}
-    .btn.ghost:hover{background: rgba(255,255,255,.04)}
-    .btn.danger{background: rgba(255,40,40,.10); border-color: rgba(255,255,255,.10); color: rgba(255,210,210,.95)}
-    .btn.danger:hover{background: rgba(255,40,40,.14)}
+    .btn.ghost{background: transparent; border-color: rgba(127,199,255,.14); color: rgba(235,245,255,.82)}
+    .btn.ghost:hover{background: rgba(127,199,255,.06)}
     .btn:disabled{opacity:.45; cursor:not-allowed; transform:none}
 
-    .main{
-      display:flex;
-      flex-direction:column;
-      gap:14px;
-      min-width:0;
-    }
+    .note{font-size:12px;color:var(--muted2);line-height:1.55}
 
-    .topbar{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-    }
-    .topbar .stamp{font-size:12px; color:var(--muted)}
-    .topbar .title{font-size:22px; font-weight:700; letter-spacing:-.02em}
-    .topbar .sub{margin-top:6px; font-size:13px; color:var(--muted)}
-    .fade{
-      animation: fadeIn 220ms ease-out;
-    }
-    @keyframes fadeIn{from{opacity:0; transform: translateY(8px)} to{opacity:1; transform: translateY(0)}}
-
-    .grid{
-      display:grid;
-      gap:12px;
-    }
-    .grid.cols2{grid-template-columns: 1fr 1fr}
-    .grid.cols3{grid-template-columns: 1fr 1fr 1fr}
-    @media (max-width: 980px){
-      .grid.cols2, .grid.cols3{grid-template-columns:1fr}
-    }
-
-    .hK{
-      display:flex; align-items:center; gap:10px;
-      font-size:12px;
-      color:var(--muted);
-      text-transform:uppercase;
+    /* Main */
+    .main{display:flex;flex-direction:column;gap:12px;min-width:0}
+    .stamp{
+      font-family:var(--mono);
+      font-size:11px;
       letter-spacing:.14em;
+      text-transform:uppercase;
+      color:var(--muted2);
     }
-    .hK .dot{
-      width:30px; height:30px;
-      border-radius:14px;
-      border:1px solid var(--border);
-      background: rgba(255,255,255,.03);
-      display:grid; place-items:center;
-    }
+    .pageTitle{margin-top:6px;font-size:22px;font-weight:880;letter-spacing:-.02em}
+    .pageSub{margin-top:8px;font-size:13px;color:var(--muted)}
+
+    /* Conteúdo por aba (NÃO sobrepõe nada) */
+    .page{display:none}
+    .page.active{display:block; animation:fadeIn 180ms ease-out}
+    @keyframes fadeIn{from{opacity:0; transform:translateY(8px)} to{opacity:1; transform:translateY(0)}}
+
+    .grid{display:grid;gap:12px}
+    .cols2{grid-template-columns:1fr 1fr}
+    .cols3{grid-template-columns:1fr 1fr 1fr}
+    @media(max-width:980px){.cols2,.cols3{grid-template-columns:1fr}}
 
     .kpi{
-      border:1px solid var(--border);
-      background: rgba(0,0,0,.16);
+      border:1px solid rgba(127,199,255,.14);
+      background: rgba(0,0,0,.22);
       border-radius:16px;
       padding:12px;
     }
-    .kpi .k{font-size:12px; color:var(--muted)}
-    .kpi .v{margin-top:6px; font-size:18px; font-weight:700; letter-spacing:-.02em}
+    .kpi .k{
+      font-family:var(--mono);
+      font-size:11px;
+      letter-spacing:.14em;
+      text-transform:uppercase;
+      color:var(--muted2);
+    }
+    .kpi .v{margin-top:6px;font-size:18px;font-weight:880;letter-spacing:-.02em}
 
-    .bar{height:10px; border-radius:999px; background: rgba(255,255,255,.06); overflow:hidden}
+    .bar{height:10px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid rgba(127,199,255,.14);overflow:hidden}
     .bar > i{
-      display:block; height:100%;
-      background: rgba(255,255,255,.18);
-      width:0%;
-      transition: width 600ms ease-out;
+      display:block;height:100%;width:0%;
+      background: linear-gradient(90deg, rgba(127,199,255,.42), rgba(169,240,255,.22));
+      box-shadow: 0 0 18px rgba(127,199,255,.22);
+      transition: width 520ms ease;
     }
-    .barline{display:flex; align-items:center; justify-content:space-between; gap:10px}
-    .barline .l{font-size:12px; color:var(--muted)}
-    .barline .r{font-size:12px; color:rgba(255,255,255,.72); font-variant-numeric: tabular-nums}
+    .barLine{display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .barLine .l{font-family:var(--mono);font-size:11px;color:var(--muted2);letter-spacing:.12em;text-transform:uppercase}
+    .barLine .r{font-family:var(--mono);font-size:11px;color:rgba(235,245,255,.80);font-variant-numeric:tabular-nums}
 
-    .list{display:grid; gap:10px; margin-top:10px}
     .task{
-      display:flex; align-items:center; justify-content:space-between; gap:12px;
-      border:1px solid var(--border);
-      background: rgba(255,255,255,.02);
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      border:1px solid rgba(127,199,255,.14);
+      background: rgba(0,0,0,.22);
       border-radius:16px;
-      padding:12px 12px;
-      transition: background var(--speed), border-color var(--speed);
-    }
-    .task:hover{background: rgba(255,255,255,.03); border-color: rgba(255,255,255,.14)}
-    .task .left{display:flex; align-items:center; gap:12px}
-    .chk{
-      width:18px; height:18px;
-      border-radius:6px;
-      border:1px solid rgba(255,255,255,.18);
-      background: rgba(0,0,0,.18);
-      display:grid; place-items:center;
-    }
-    .chk i{width:10px; height:10px; border-radius:3px; background: rgba(255,255,255,.0); transition: background var(--speed)}
-    .task.done{background: rgba(255,255,255,.04)}
-    .task.done .chk i{background: rgba(255,255,255,.30)}
-    .task .label{font-size:14px; color:rgba(255,255,255,.88)}
-    .task .status{font-size:12px; color:var(--muted); white-space:nowrap}
-
-    .note{font-size:12px; color:var(--muted2); line-height:1.6}
-
-    .workoutCards{
-      display:grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap:12px;
-      margin-top:12px;
-    }
-    @media (max-width: 980px){ .workoutCards{grid-template-columns:1fr} }
-    .wcard{
-      all:unset;
+      padding:12px;
       cursor:pointer;
-      border:1px solid var(--border);
-      background: rgba(255,255,255,.02);
-      border-radius:18px;
-      padding:14px;
-      transition: background var(--speed), border-color var(--speed), transform var(--speed);
-      display:flex; flex-direction:column; gap:10px;
+      transition: background var(--speed), border-color var(--speed);
+      user-select:none;
     }
-    .wcard:hover{background: rgba(255,255,255,.03); border-color: rgba(255,255,255,.14)}
-    .wcard.active{background: rgba(255,255,255,.05); border-color: rgba(255,255,255,.18)}
-    .wcard .t{font-size:12px; color:var(--muted); letter-spacing:.12em; text-transform:uppercase}
-    .wcard .s{font-size:14px; font-weight:700; letter-spacing:-.01em}
-    .wcard .d{font-size:12px; color:var(--muted)}
+    .task:hover{background: rgba(127,199,255,.05); border-color: rgba(127,199,255,.22)}
+    .task.done{background: rgba(127,199,255,.10)}
+    .left{display:flex;align-items:center;gap:12px;min-width:0}
+    .chk{
+      width:18px;height:18px;border-radius:7px;
+      border:1px solid rgba(127,199,255,.22);
+      background: rgba(0,0,0,.20);
+      display:grid;place-items:center;
+      flex:0 0 auto;
+    }
+    .chk i{width:10px;height:10px;border-radius:4px;background:transparent;transition: background var(--speed)}
+    .task.done .chk i{background: rgba(72,255,154,.45)}
+    .label{font-size:14px;font-weight:760;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .status{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.10em;text-transform:uppercase;white-space:nowrap}
 
-    .table{
-      margin-top:12px;
-      display:grid;
-      gap:10px;
+    .wcards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}
+    @media(max-width:980px){.wcards{grid-template-columns:1fr}}
+    .wcard{
+      all:unset;cursor:pointer;user-select:none;
+      border:1px solid rgba(127,199,255,.14);
+      background: rgba(0,0,0,.22);
+      border-radius:16px;
+      padding:14px;
+      transition: background var(--speed), border-color var(--speed);
+      display:flex;flex-direction:column;gap:8px;
     }
+    .wcard:hover{background: rgba(127,199,255,.05); border-color: rgba(127,199,255,.22)}
+    .wcard.active{background: rgba(127,199,255,.12); border-color: rgba(169,240,255,.26)}
+    .wcard .t{font-family:var(--mono);font-size:11px;color:var(--muted2);letter-spacing:.14em;text-transform:uppercase}
+    .wcard .s{font-size:14px;font-weight:860;letter-spacing:-.01em}
+    .wcard .d{font-size:12px;color:var(--muted)}
+
     .ex{
-      border:1px solid var(--border);
-      background: rgba(255,255,255,.02);
+      border:1px solid rgba(127,199,255,.14);
+      background: rgba(0,0,0,.22);
       border-radius:16px;
       padding:12px;
       display:grid;
-      grid-template-columns: 2fr 1fr 1fr;
+      grid-template-columns:2fr 1fr 1fr;
       gap:10px;
       align-items:center;
     }
-    @media (max-width: 980px){ .ex{grid-template-columns:1fr} }
-    .ex .nm{font-size:14px; font-weight:650}
-    .ex .nt{font-size:12px; color:var(--muted)}
-    .ex .k{font-size:11px; color:var(--muted2); text-transform:uppercase; letter-spacing:.14em}
-    .ex .v{font-size:13px; color:rgba(255,255,255,.84); font-variant-numeric: tabular-nums}
+    @media(max-width:980px){.ex{grid-template-columns:1fr}}
+    .ex .nm{font-size:14px;font-weight:860}
+    .ex .nt{font-size:12px;color:var(--muted)}
+    .ex .k{font-family:var(--mono);font-size:10px;color:var(--muted2);letter-spacing:.14em;text-transform:uppercase}
+    .ex .v{font-family:var(--mono);font-size:12px;color:rgba(235,245,255,.84);font-variant-numeric:tabular-nums}
 
-    .form{
-      display:grid;
-      gap:12px;
-      margin-top:12px;
-    }
-    .fields{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:12px;
-    }
-    @media (max-width: 980px){ .fields{grid-template-columns:1fr} }
-    .field{
-      display:grid;
-      gap:6px;
-    }
-    .field label{font-size:12px; color:var(--muted)}
-    .field input, .field select, .field textarea{
+    .fields{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+    @media(max-width:980px){.fields{grid-template-columns:1fr}}
+    .field{display:grid;gap:6px}
+    label{font-size:12px;color:var(--muted)}
+    input,select,textarea{
       width:100%;
-      padding:10px 10px;
-      border-radius:14px;
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(0,0,0,.26);
-      color: rgba(255,255,255,.90);
+      padding:10px;
+      border-radius:16px;
+      border:1px solid rgba(127,199,255,.14);
+      background: rgba(0,0,0,.28);
+      color: rgba(235,245,255,.92);
       outline:none;
-      box-shadow: none;
-      transition: border-color var(--speed), box-shadow var(--speed);
       font-size:13px;
+      transition: border-color var(--speed), box-shadow var(--speed);
     }
-    .field input:focus, .field select:focus, .field textarea:focus{
-      border-color: rgba(255,255,255,.18);
-      box-shadow: var(--ring);
+    input:focus,select:focus,textarea:focus{
+      border-color: rgba(169,240,255,.28);
+      box-shadow: 0 0 0 2px rgba(127,199,255,.10);
     }
-    .field textarea{min-height:92px; resize: vertical}
-    .hint{font-size:11px; color:var(--muted2); line-height:1.45}
+    textarea{min-height:90px; resize:vertical}
 
     .hist{
       margin-top:12px;
       display:grid;
       gap:10px;
-      max-height: 280px;
+      max-height:280px;
       overflow:auto;
       padding-right:6px;
     }
-    .hist::-webkit-scrollbar{width:8px}
-    .hist::-webkit-scrollbar-thumb{background: rgba(255,255,255,.08); border-radius:999px}
     .hitem{
-      border:1px solid var(--border);
-      background: rgba(255,255,255,.02);
+      border:1px solid rgba(127,199,255,.14);
+      background: rgba(0,0,0,.22);
       border-radius:16px;
       padding:12px;
       display:flex;
@@ -362,1222 +367,196 @@
       justify-content:space-between;
       gap:12px;
     }
-    .hitem .a{display:grid; gap:4px}
-    .hitem .b{
-      text-align:right;
-      font-variant-numeric: tabular-nums;
-      color: rgba(255,255,255,.78);
-    }
-    .hitem .wk{font-size:12px; color:var(--muted)}
-    .hitem .sc{font-size:14px; font-weight:700}
-    .hitem .sm{font-size:12px; color:var(--muted2)}
+    .wk{font-family:var(--mono);font-size:11px;color:var(--muted2);letter-spacing:.12em;text-transform:uppercase}
+    .sc{font-size:14px;font-weight:880}
+    .sm{font-size:12px;color:var(--muted)}
 
-    .footer{
-      margin-top:8px;
-      font-size:12px;
-      color: rgba(255,255,255,.38);
-    }
-
-    /* widget */
-    .widget{
-      border:1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.45);
-      border-radius:22px;
-      box-shadow: var(--shadow);
+    .widgetBox{
+      border:1px solid rgba(127,199,255,.16);
+      background: rgba(0,0,0,.30);
+      border-radius:16px;
       padding:14px;
-      width:100%;
-      max-width:520px;
+      max-width:560px;
     }
-    .widget .top{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-    }
-    .widget .wk{font-size:12px; color:var(--muted)}
-    .widget .en{font-size:14px; font-weight:700}
-    .badge{
-      border:1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.04);
-      border-radius:16px;
-      padding:10px 12px;
-      min-width:90px;
-    }
-    .badge .k{font-size:11px; color:var(--muted2); text-transform:uppercase; letter-spacing:.14em}
-    .badge .v{margin-top:4px; font-size:14px; font-weight:800}
-    .wlist{margin-top:12px; display:grid; gap:8px}
-    .wrow{
-      border:1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.02);
-      border-radius:16px;
-      padding:10px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-    }
-    .wrow .l{display:flex; align-items:center; gap:10px}
-    .wrow .t{font-size:12px; color:rgba(255,255,255,.82)}
-    .wrow .s{font-size:11px; color:var(--muted)}
-    .wbtns{margin-top:12px; display:flex; gap:10px; flex-wrap:wrap}
-    .mono{font-family:var(--mono)}
+
+    .footer{margin-top:10px;font-size:12px;color:rgba(235,245,255,.38)}
   </style>
 </head>
 
 <body>
+  <div class="bg-grid"></div>
+
   <div class="app">
     <!-- SIDEBAR -->
-    <aside class="sidebar">
-      <section class="surface pad-lg">
-        <div class="brand">
-          <div>
-            <div class="t1">Sistema</div>
-            <div class="t2">Evolução</div>
-          </div>
-          <div class="sig" aria-hidden="true"></div>
+    <aside class="panel pad-lg">
+      <div class="brand">
+        <div>
+          <div class="kicker">SYSTEM</div>
+          <div class="title">EVOLUÇÃO</div>
         </div>
+        <div class="sig" aria-hidden="true"></div>
+      </div>
 
-        <div class="nav" role="tablist" aria-label="Navegação">
-          <button class="active" data-tab="dashboard" role="tab">
-            <span class="ic" aria-hidden="true">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                <path d="M3 12h8V3H3v9Zm10 9h8V11h-8v10ZM3 21h8v-7H3v7Zm10-12h8V3h-8v6Z" stroke="currentColor" opacity=".85" stroke-width="1.6"/>
-              </svg>
-            </span>
-            <span class="meta">
-              <span class="l1">Dashboard</span>
-              <span class="l2">Visão geral</span>
-            </span>
-          </button>
-
-          <button data-tab="missions" role="tab">
-            <span class="ic" aria-hidden="true">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                <path d="M9 11l2 2 4-4" stroke="currentColor" opacity=".85" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M7 4h10a2 2 0 0 1 2 2v14H5V6a2 2 0 0 1 2-2Z" stroke="currentColor" opacity=".85" stroke-width="1.6"/>
-              </svg>
-            </span>
-            <span class="meta">
-              <span class="l1">Missão diária</span>
-              <span class="l2">Checklist</span>
-            </span>
-          </button>
-
-          <button data-tab="workouts" role="tab">
-            <span class="ic" aria-hidden="true">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                <path d="M7 7h10v10H7V7Z" stroke="currentColor" opacity=".85" stroke-width="1.6"/>
-                <path d="M3 9h4v6H3V9Zm14 0h4v6h-4V9Z" stroke="currentColor" opacity=".85" stroke-width="1.6"/>
-              </svg>
-            </span>
-            <span class="meta">
-              <span class="l1">Treinos</span>
-              <span class="l2">Em casa</span>
-            </span>
-          </button>
-
-          <button id="tab-assessment-btn" data-tab="assessment" role="tab">
-            <span class="ic" aria-hidden="true">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                <path d="M8 7h8M8 11h8M8 15h5" stroke="currentColor" opacity=".85" stroke-width="1.6" stroke-linecap="round"/>
-                <path d="M6 4h12a2 2 0 0 1 2 2v14H4V6a2 2 0 0 1 2-2Z" stroke="currentColor" opacity=".85" stroke-width="1.6"/>
-              </svg>
-            </span>
-            <span class="meta">
-              <span class="l1" id="tab-assessment-label">Check-in</span>
-              <span class="l2">Semanal</span>
-            </span>
-          </button>
-
-          <button data-tab="widget" role="tab">
-            <span class="ic" aria-hidden="true">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                <path d="M4 4h7v7H4V4Zm9 0h7v7h-7V4ZM4 13h7v7H4v-7Zm9 0h7v7h-7v-7Z" stroke="currentColor" opacity=".85" stroke-width="1.6"/>
-              </svg>
-            </span>
-            <span class="meta">
-              <span class="l1">Widget</span>
-              <span class="l2">Mini sistema</span>
-            </span>
-          </button>
-        </div>
-      </section>
-
-      <section class="surface pad">
-        <div class="hK">
-          <span class="dot" aria-hidden="true">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-              <path d="M12 22s8-4 8-10V7l-8-4-8 4v5c0 6 8 10 8 10Z" stroke="currentColor" opacity=".85" stroke-width="1.6"/>
-            </svg>
+      <div class="nav" id="nav">
+        <button data-tab="dash" class="active">
+          <span class="ic">▢</span>
+          <span>
+            <div class="t1">Dashboard</div>
+            <div class="t2">Visão geral</div>
           </span>
-          <span>Identidade</span>
-        </div>
+        </button>
 
-        <div class="identity">
-          <div class="pill">
-            <div class="k">Usuário</div>
-            <div class="v" id="side-name"></div>
-          </div>
-          <div class="pill">
-            <div class="k">Rank</div>
-            <div class="v" id="side-rank"></div>
-          </div>
-          <div class="row">
-            <button class="btn ghost" id="btn-edit-name">Editar nome</button>
-            <button class="btn danger" id="btn-reset">Reset local</button>
-          </div>
-          <div class="note">Persistência local. Estrutura pronta para sincronizar com backend depois.</div>
+        <button data-tab="mission">
+          <span class="ic">✓</span>
+          <span>
+            <div class="t1">Missão diária</div>
+            <div class="t2">Checklist</div>
+          </span>
+        </button>
+
+        <button data-tab="workouts">
+          <span class="ic">≡</span>
+          <span>
+            <div class="t1">Treinos</div>
+            <div class="t2">Em casa</div>
+          </span>
+        </button>
+
+        <button data-tab="checkin" id="nav-checkin">
+          <span class="ic">⌁</span>
+          <span>
+            <div class="t1" id="checkin-label">Check-in</div>
+            <div class="t2">Semanal</div>
+          </span>
+        </button>
+
+        <button data-tab="widget">
+          <span class="ic">▦</span>
+          <span>
+            <div class="t1">Widget</div>
+            <div class="t2">Mini sistema</div>
+          </span>
+        </button>
+      </div>
+
+      <div style="margin-top:12px" class="sectionK">
+        <span class="dot">◎</span><span>Identidade</span>
+      </div>
+
+      <div style="display:grid;gap:10px;margin-top:12px">
+        <div class="pill">
+          <div class="k">Usuário</div>
+          <div class="v" id="u-name">Usuário</div>
         </div>
-      </section>
+        <div class="pill">
+          <div class="k">Rank</div>
+          <div class="v" id="u-rank">E</div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn ghost" id="btn-edit-name">Editar nome</button>
+          <button class="btn" id="btn-reset">Reset local</button>
+        </div>
+        <div class="note">Tudo salva localmente no navegador. Estrutura pronta pra virar app depois.</div>
+      </div>
     </aside>
 
     <!-- MAIN -->
     <main class="main">
-      <section class="surface pad-lg fade" id="page-header">
-        <div class="topbar">
-          <div>
-            <div class="stamp" id="stamp"></div>
-            <div class="title" id="page-title">Dashboard</div>
-            <div class="sub" id="page-sub">Sistema de evolução pessoal.</div>
-          </div>
-          <div class="row" id="header-actions"></div>
-        </div>
+      <section class="panel pad-lg">
+        <div class="stamp" id="stamp"></div>
+        <div class="pageTitle" id="pageTitle">Dashboard</div>
+        <div class="pageSub" id="pageSub">Não é um jogo. É um sistema pessoal de disciplina e evolução.</div>
       </section>
 
-      <!-- DASHBOARD -->
-      <section class="fade" id="page-dashboard">
-        <div class="grid cols2">
-          <section class="surface pad-lg">
-            <div class="hK">
-              <span class="dot" aria-hidden="true">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                  <path d="M4 13h6V4H4v9Zm10 7h6V10h-6v10Z" stroke="currentColor" opacity=".85" stroke-width="1.6"/>
-                </svg>
-              </span>
-              <span>Progresso</span>
-            </div>
-
-            <div class="grid cols2" style="margin-top:12px">
-              <div class="kpi">
-                <div class="k">Dia atual</div>
-                <div class="v" id="kpi-day"></div>
-              </div>
-              <div class="kpi">
-                <div class="k">Score</div>
-                <div class="v mono" id="kpi-score"></div>
-              </div>
-            </div>
-
-            <div style="margin-top:14px; display:grid; gap:12px">
-              <div>
-                <div class="barline"><div class="l">Energia</div><div class="r mono" id="energy-pct"></div></div>
-                <div class="bar"><i id="energy-bar"></i></div>
-              </div>
-              <div>
-                <div class="barline"><div class="l">Disciplina</div><div class="r mono" id="disc-pct"></div></div>
-                <div class="bar"><i id="disc-bar"></i></div>
-              </div>
-            </div>
-          </section>
-
-          <section class="surface pad-lg">
-            <div class="hK">
-              <span class="dot" aria-hidden="true">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                  <path d="M12 2 3 6v6c0 6 9 10 9 10s9-4 9-10V6l-9-4Z" stroke="currentColor" opacity=".85" stroke-width="1.6"/>
-                </svg>
-              </span>
-              <span>Status</span>
-            </div>
-
-            <div class="grid" style="margin-top:12px">
-              <div class="task" style="cursor:default">
-                <div class="left">
-                  <div class="label">Força</div>
-                </div>
-                <div class="status mono" id="st-strength"></div>
-              </div>
-              <div class="task" style="cursor:default">
-                <div class="left"><div class="label">Resistência</div></div>
-                <div class="status mono" id="st-endurance"></div>
-              </div>
-              <div class="task" style="cursor:default">
-                <div class="left"><div class="label">Agilidade</div></div>
-                <div class="status mono" id="st-agility"></div>
-              </div>
-              <div class="task" style="cursor:default">
-                <div class="left"><div class="label">Vitalidade</div></div>
-                <div class="status mono" id="st-vitality"></div>
-              </div>
-            </div>
-
-            <div class="row" style="margin-top:12px">
-              <button class="btn ghost" id="btn-boost">Boost leve</button>
-              <button class="btn ghost" id="btn-effort">Esforço</button>
-            </div>
-          </section>
-        </div>
-
-        <div class="grid cols3" style="margin-top:12px">
-          <section class="surface pad-lg" style="grid-column: span 2">
-            <div class="hK">
-              <span class="dot" aria-hidden="true">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                  <path d="M4 19V5m0 14h16M8 15l3-3 3 2 5-6" stroke="currentColor" opacity=".85" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </span>
-              <span>Evolução</span>
-            </div>
-
-            <div class="grid cols3" style="margin-top:12px">
-              <div class="kpi">
-                <div class="k">Check-ins</div>
-                <div class="v mono" id="kpi-checkins"></div>
-              </div>
-              <div class="kpi">
-                <div class="k">Δ Score (semana)</div>
-                <div class="v mono" id="kpi-delta"></div>
-              </div>
-              <div class="kpi">
-                <div class="k">Último check-in</div>
-                <div class="v mono" id="kpi-last"></div>
-              </div>
-            </div>
-
-            <div class="note" style="margin-top:10px">
-              Rank e Status são atualizados pelo check-in semanal. O objetivo é consistência e evolução mensurável.
-            </div>
-          </section>
-
-          <section class="surface pad-lg">
-            <div class="hK">
-              <span class="dot" aria-hidden="true">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                  <path d="M12 2v10" stroke="currentColor" opacity=".85" stroke-width="1.6" stroke-linecap="round"/>
-                  <path d="M6.5 12.5A6.5 6.5 0 1 0 12 5.5" stroke="currentColor" opacity=".85" stroke-width="1.6" stroke-linecap="round"/>
-                </svg>
-              </span>
-              <span>Ação</span>
-            </div>
-
-            <div style="margin-top:12px; display:grid; gap:10px">
-              <button class="btn" id="btn-complete" disabled>Concluir missão</button>
-              <button class="btn ghost" id="btn-go-assessment">Check-in semanal</button>
-              <div class="note">Concluir avança o dia, recupera energia e aumenta disciplina. Sem efeitos exagerados.</div>
-            </div>
-          </section>
-        </div>
-
-        <div class="footer">Não é um jogo. É um sistema pessoal de disciplina e evolução.</div>
-      </section>
-
-      <!-- MISSIONS -->
-      <section class="fade" id="page-missions" hidden>
-        <section class="surface pad-lg">
-          <div class="hK">
-            <span class="dot" aria-hidden="true">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                <path d="M9 11l2 2 4-4" stroke="currentColor" opacity=".85" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M7 4h10a2 2 0 0 1 2 2v14H5V6a2 2 0 0 1 2-2Z" stroke="currentColor" opacity=".85" stroke-width="1.6"/>
-              </svg>
-            </span>
-            <span>Missão diária</span>
-          </div>
-
-          <div class="grid cols3" style="margin-top:12px">
-            <div class="kpi">
-              <div class="k">Dia</div>
-              <div class="v mono" id="ms-day"></div>
-            </div>
-            <div class="kpi">
-              <div class="k">Energia</div>
-              <div class="v mono" id="ms-energy"></div>
-            </div>
-            <div class="kpi">
-              <div class="k">Disciplina</div>
-              <div class="v mono" id="ms-disc"></div>
-            </div>
+      <!-- DASH -->
+      <section class="page active" id="page-dash">
+        <section class="panel pad-lg">
+          <div class="grid cols3">
+            <div class="kpi"><div class="k">Usuário</div><div class="v" id="dash-name"></div></div>
+            <div class="kpi"><div class="k">Dia</div><div class="v" id="dash-day"></div></div>
+            <div class="kpi"><div class="k">Rank</div><div class="v" id="dash-rank"></div></div>
           </div>
 
           <div class="grid cols2" style="margin-top:12px">
-            <section class="surface pad" style="background:transparent">
-              <div class="hK" style="margin-bottom:8px">
-                <span class="dot" aria-hidden="true">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                    <path d="M3 12h18" stroke="currentColor" opacity=".85" stroke-width="1.6" stroke-linecap="round"/>
-                    <path d="M7 12l2 2 4-4" stroke="currentColor" opacity=".85" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                </span>
-                <span>Checklist</span>
+            <div class="panel pad-lg" style="background:rgba(0,0,0,.14); box-shadow:none">
+              <div class="sectionK"><span class="dot">⟡</span><span>Recursos</span></div>
+
+              <div class="grid cols2" style="margin-top:12px">
+                <div class="kpi"><div class="k">Disciplina</div><div class="v" id="dash-disc"></div></div>
+                <div class="kpi"><div class="k">Score</div><div class="v" id="dash-score"></div></div>
               </div>
 
-              <div class="list" id="task-list"></div>
-            </section>
-
-            <section class="surface pad" style="background:transparent">
-              <div class="hK" style="margin-bottom:8px">
-                <span class="dot" aria-hidden="true">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                    <path d="M12 2v10" stroke="currentColor" opacity=".85" stroke-width="1.6" stroke-linecap="round"/>
-                    <path d="M6.5 12.5A6.5 6.5 0 1 0 12 5.5" stroke="currentColor" opacity=".85" stroke-width="1.6" stroke-linecap="round"/>
-                  </svg>
-                </span>
-                <span>Conclusão</span>
-              </div>
-
-              <div style="display:grid; gap:12px">
+              <div style="display:grid;gap:10px;margin-top:14px">
                 <div>
-                  <div class="barline"><div class="l">Progresso</div><div class="r mono" id="ms-progress"></div></div>
-                  <div class="bar"><i id="ms-bar"></i></div>
+                  <div class="barLine"><div class="l">Energia</div><div class="r" id="dash-energy"></div></div>
+                  <div class="bar"><i id="bar-energy"></i></div>
                 </div>
-
-                <button class="btn" id="ms-complete" disabled>Concluir missão</button>
-
-                <div class="note">
-                  Regra: só conclui quando todas as tarefas estiverem marcadas.
-                  Ao concluir: Dia +1, Energia +18 (máx 100), Disciplina +6 (máx 100), checklist reseta.
-                </div>
-              </div>
-            </section>
-          </div>
-        </section>
-      </section>
-
-      <!-- WORKOUTS -->
-      <section class="fade" id="page-workouts" hidden>
-        <section class="surface pad-lg">
-          <div class="hK">
-            <span class="dot" aria-hidden="true">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                <path d="M7 7h10v10H7V7Z" stroke="currentColor" opacity=".85" stroke-width="1.6"/>
-                <path d="M3 9h4v6H3V9Zm14 0h4v6h-4V9Z" stroke="currentColor" opacity=".85" stroke-width="1.6"/>
-              </svg>
-            </span>
-            <span>Treinos em casa</span>
-          </div>
-
-          <div class="note" style="margin-top:10px">
-            Peso do corpo por padrão. Mochila e elástico são opcionais. Sem supino, sem máquinas.
-          </div>
-
-          <div class="workoutCards" id="workout-cards"></div>
-
-          <div id="workout-detail" class="fade" style="margin-top:12px" hidden>
-            <section class="surface pad-lg">
-              <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px">
                 <div>
-                  <div class="stamp" id="wd-kicker"></div>
-                  <div class="title" id="wd-title" style="font-size:18px"></div>
-                  <div class="sub" id="wd-sub" style="font-size:12px"></div>
+                  <div class="barLine"><div class="l">Disciplina</div><div class="r" id="dash-disc2"></div></div>
+                  <div class="bar"><i id="bar-disc"></i></div>
                 </div>
-                <button class="btn ghost" id="wd-close">Fechar</button>
               </div>
 
-              <div class="table" id="workout-exercises"></div>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+                <button class="btn ghost" id="btn-boost">Boost leve</button>
+                <button class="btn ghost" id="btn-effort">Esforço</button>
+              </div>
+
+              <div class="note" style="margin-top:10px">Boost/Esforço simulam variação de energia no dia.</div>
+            </div>
+
+            <div class="panel pad-lg" style="background:rgba(0,0,0,.14); box-shadow:none">
+              <div class="sectionK"><span class="dot">⟠</span><span>Status</span></div>
+
+              <div class="grid cols2" style="margin-top:12px">
+                <div class="kpi"><div class="k">Força</div><div class="v" id="st-strength"></div></div>
+                <div class="kpi"><div class="k">Resistência</div><div class="v" id="st-endurance"></div></div>
+                <div class="kpi"><div class="k">Agilidade</div><div class="v" id="st-agility"></div></div>
+                <div class="kpi"><div class="k">Vitalidade</div><div class="v" id="st-vitality"></div></div>
+              </div>
+
+              <div class="grid cols2" style="margin-top:12px">
+                <div class="kpi"><div class="k">Check-ins</div><div class="v" id="dash-checkins"></div></div>
+                <div class="kpi"><div class="k">Δ Score (semana)</div><div class="v" id="dash-delta"></div></div>
+              </div>
+
+              <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+                <button class="btn" id="btn-go-checkin">Check-in semanal</button>
+                <button class="btn" id="btn-complete" disabled>Concluir missão</button>
+              </div>
+
               <div class="note" style="margin-top:10px">
-                Segurança: se “remada com toalha/mesa” não for estável no seu ambiente, substitua por “Superman + Y-T-W” e “Rosca com mochila”.
+                Concluir missão: Dia +1, Energia +18 (máx 100), Disciplina +6 (máx 100).
               </div>
-            </section>
+            </div>
           </div>
+
+          <div class="footer">Não é um jogo. É um sistema pessoal de disciplina e evolução.</div>
         </section>
       </section>
 
-      <!-- ASSESSMENT -->
-      <section class="fade" id="page-assessment" hidden>
-        <section class="surface pad-lg">
-          <div class="hK">
-            <span class="dot" aria-hidden="true">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                <path d="M8 7h8M8 11h8M8 15h5" stroke="currentColor" opacity=".85" stroke-width="1.6" stroke-linecap="round"/>
-                <path d="M6 4h12a2 2 0 0 1 2 2v14H4V6a2 2 0 0 1 2-2Z" stroke="currentColor" opacity=".85" stroke-width="1.6"/>
-              </svg>
-            </span>
-            <span>Questionário semanal</span>
-          </div>
-
-          <div class="note" style="margin-top:10px" id="assess-note"></div>
+      <!-- MISSION -->
+      <section class="page" id="page-mission">
+        <section class="panel pad-lg">
+          <div class="sectionK"><span class="dot">✓</span><span>Missão diária</span></div>
 
           <div class="grid cols3" style="margin-top:12px">
-            <div class="kpi">
-              <div class="k">Rank previsto</div>
-              <div class="v" id="a-rank"></div>
-            </div>
-            <div class="kpi">
-              <div class="k">Score</div>
-              <div class="v mono" id="a-score"></div>
-            </div>
-            <div class="kpi">
-              <div class="k">Disciplina (derivada)</div>
-              <div class="v mono" id="a-disc"></div>
-            </div>
+            <div class="kpi"><div class="k">Dia</div><div class="v" id="ms-day"></div></div>
+            <div class="kpi"><div class="k">Energia</div><div class="v" id="ms-energy"></div></div>
+            <div class="kpi"><div class="k">Disciplina</div><div class="v" id="ms-disc"></div></div>
           </div>
 
-          <form class="form" id="assessment-form">
-            <div class="fields">
-              <div class="field">
-                <label>Nome</label>
-                <input id="f-name" autocomplete="off" />
-              </div>
-              <div class="field">
-                <label>Nível</label>
-                <select id="f-level">
-                  <option value="iniciante">Iniciante</option>
-                  <option value="intermediario">Intermediário</option>
-                  <option value="avancado">Avançado</option>
-                </select>
-              </div>
-
-              <div class="field">
-                <label>Idade</label>
-                <input id="f-age" type="number" min="0" />
-              </div>
-              <div class="field">
-                <label>Altura (cm)</label>
-                <input id="f-height" type="number" min="0" />
-              </div>
-
-              <div class="field">
-                <label>Peso (kg)</label>
-                <input id="f-weight" type="number" min="0" />
-              </div>
-              <div class="field">
-                <label>Aderência da semana (%)</label>
-                <input id="f-adh" type="number" min="0" max="100" />
-                <div class="hint">Quanto você cumpriu do que planejou na semana anterior?</div>
-              </div>
-            </div>
-
-            <div class="surface pad" style="background:transparent">
-              <div class="hK" style="margin-bottom:8px">
-                <span class="dot" aria-hidden="true">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                    <path d="M5 13h14" stroke="currentColor" opacity=".85" stroke-width="1.6" stroke-linecap="round"/>
-                    <path d="M7 10h10" stroke="currentColor" opacity=".85" stroke-width="1.6" stroke-linecap="round"/>
-                    <path d="M9 16h6" stroke="currentColor" opacity=".85" stroke-width="1.6" stroke-linecap="round"/>
-                  </svg>
-                </span>
-                <span>Testes rápidos</span>
-              </div>
-
-              <div class="fields">
-                <div class="field">
-                  <label>Flexões (máx reps)</label>
-                  <input id="f-push" type="number" min="0" />
-                </div>
-                <div class="field">
-                  <label>Agachamentos (máx reps)</label>
-                  <input id="f-squat" type="number" min="0" />
-                </div>
-                <div class="field">
-                  <label>Prancha (segundos)</label>
-                  <input id="f-plank" type="number" min="0" />
-                </div>
-                <div class="field">
-                  <label>Cardio contínuo (min)</label>
-                  <input id="f-cardio" type="number" min="0" />
-                  <div class="hint">Caminhada/corrida/corda no ritmo sustentável.</div>
-                </div>
-              </div>
-            </div>
-
-            <div class="field">
-              <label>Notas</label>
-              <textarea id="f-notes" placeholder="Opcional: dores, foco, ajustes da semana"></textarea>
-            </div>
-
-            <div class="row">
-              <button class="btn" type="submit" id="btn-save-checkin" disabled>Salvar check-in</button>
-              <button class="btn ghost" type="button" id="btn-back-dash">Voltar</button>
-            </div>
-
-            <div class="note">Este check-in atualiza Rank/Status e registra o histórico semanal (local).</div>
-          </form>
-
-          <div class="hist" id="hist"></div>
-        </section>
-      </section>
-
-      <!-- WIDGET -->
-      <section class="fade" id="page-widget" hidden>
-        <section class="surface pad-lg">
-          <div class="hK">
-            <span class="dot" aria-hidden="true">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                <path d="M4 4h7v7H4V4Zm9 0h7v7h-7V4ZM4 13h7v7H4v-7Zm9 0h7v7h-7v-7Z" stroke="currentColor" opacity=".85" stroke-width="1.6"/>
-              </svg>
-            </span>
-            <span>Widget</span>
-          </div>
-
-          <div class="note" style="margin-top:10px">
-            Versão mini do sistema. Feita para embutir em outros sites depois.
-          </div>
-
-          <div style="margin-top:12px">
-            <div class="widget" id="widget-box">
-              <div class="top">
-                <div>
-                  <div class="wk mono" id="w-day"></div>
-                  <div class="en" id="w-energy"></div>
-                </div>
-                <div class="badge">
-                  <div class="k">Rank</div>
-                  <div class="v" id="w-rank"></div>
-                </div>
-              </div>
-
-              <div style="margin-top:10px">
-                <div class="bar"><i id="w-bar"></i></div>
-                <div class="barline" style="margin-top:8px">
-                  <div class="l">Missão diária</div>
-                  <div class="r mono" id="w-progress"></div>
-                </div>
-              </div>
-
-              <div class="wlist" id="w-list"></div>
-
-              <div class="wbtns">
-                <button class="btn" id="w-complete" disabled>Concluir</button>
-                <button class="btn ghost" id="w-checkin"></button>
-              </div>
-            </div>
-          </div>
-        </section>
-      </section>
-
-      <div class="footer">Não é um jogo. É um sistema pessoal de disciplina e evolução.</div>
-    </main>
-  </div>
-
-  <script>
-    // -----------------------
-    // Estado / Persistência
-    // -----------------------
-    const STORAGE_KEY = "solo-evolution.profile.v3";
-
-    const RANKS = ["E","D","C","B","A","S","SS","SSS"];
-    const clamp = (n,min,max)=>Math.max(min,Math.min(max,n));
-
-    const now = ()=>Date.now();
-    const daysBetween = (a,b)=>Math.floor(Math.abs(a-b)/(1000*60*60*24));
-    const startOfISOWeek = (ts)=>{
-      const d=new Date(ts);
-      const day=d.getDay();
-      const diff=(day===0?-6:1)-day; // monday start
-      d.setDate(d.getDate()+diff);
-      d.setHours(0,0,0,0);
-      return d.getTime();
-    };
-    const isWeeklyDue = (lastAt)=>!lastAt || daysBetween(now(), lastAt) >= 7;
-
-    function todayLabel(){
-      const d=new Date();
-      const days=["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
-      const months=["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
-      const dd=String(d.getDate()).padStart(2,"0");
-      return `${days[d.getDay()]} • ${dd} ${months[d.getMonth()]} ${d.getFullYear()}`;
-    }
-
-    function uuid(){
-      // compatível sem crypto.randomUUID
-      return "xxxxxxxyxxxx".replace(/[xy]/g, c=>{
-        const r = Math.random()*16|0;
-        const v = c==="x"? r : (r&0x3|0x8);
-        return v.toString(16);
-      }) + String(Date.now());
-    }
-
-    // -----------------------
-    // Derivação Rank/Score/Stats
-    // -----------------------
-    function scoreFromAssessment(a){
-      const push = clamp((a.tests.pushups/60)*100,0,100);
-      const squat = clamp((a.tests.squats/100)*100,0,100);
-      const plank = clamp((a.tests.plankSec/240)*100,0,100);
-      const cardio = clamp((a.tests.cardioMin/60)*100,0,100);
-      const performance = (push+squat+plank+cardio)/4;
-      const adherence = clamp(a.adherencePct,0,100);
-      return Math.round(performance*0.6 + adherence*0.4);
-    }
-    function rankFromScore(score){
-      const idx = clamp(Math.floor(score/12.5), 0, RANKS.length-1);
-      return RANKS[idx];
-    }
-    function statsFromAssessment(a){
-      const strength = Math.round(10 + clamp((a.tests.pushups/60)*50,0,50));
-      const endurance = Math.round(10 + clamp((a.tests.squats/100)*50,0,50));
-      const vitality = Math.round(10 + clamp((a.tests.plankSec/240)*50,0,50));
-      const agility = Math.round(10 + clamp((a.tests.cardioMin/60)*50,0,50));
-      return { strength, endurance, agility, vitality };
-    }
-    function disciplineFromAdherence(adherencePct){
-      return clamp(Math.round(20 + (clamp(adherencePct,0,100)*80)/100), 0, 100);
-    }
-
-    // -----------------------
-    // Dados
-    // -----------------------
-    const DEFAULT_PROFILE = {
-      user: { name: "Usuário" },
-      meta: {
-        day: 1,
-        createdAt: now(),
-        lastCompletedDay: null,
-        lastAssessmentAt: null
-      },
-      resources: { energy: 72, discipline: 38 },
-      stats: { strength: 24, endurance: 22, agility: 18, vitality: 20 },
-      derived: { rank: "E", assessmentScore: 0 },
-      missions: {
-        items: [
-          { id:"workout", label:"Treino do dia", done:false },
-          { id:"water", label:"Hidratação (2L)", done:false },
-          { id:"nutrition", label:"Alimentação alinhada", done:false },
-          { id:"sleep", label:"Sono (7–8h)", done:false }
-        ]
-      },
-      workouts: {
-        activeId: null,
-        items: [
-          {
-            id:"A",
-            title:"Treino A",
-            subtitle:"Parte superior (casa)",
-            plan:[
-              { name:"Flexão (variação adequada)", sets:"4xAMRAP", note:"Pare 1–2 reps antes da falha" },
-              { name:"Flexão inclinada/declinada", sets:"3x8–15", note:"Ajuste a dificuldade" },
-              { name:"Pike push-up", sets:"4x6–12", note:"Ombros • core firme" },
-              { name:"Tríceps no banco/cadeira", sets:"3x8–15", note:"Ombros estáveis" },
-              { name:"Prancha com toque no ombro", sets:"3x20–40s", note:"Sem girar quadril" },
-              { name:"Flexão isométrica", sets:"2x20–30s", note:"Controle" }
-            ]
-          },
-          {
-            id:"B",
-            title:"Treino B",
-            subtitle:"Costas / bíceps (casa)",
-            plan:[
-              { name:"Remada com toalha/mesa", sets:"4x8–12", note:"Se não for seguro, substitua" },
-              { name:"Superman", sets:"4x12–20", note:"Contração total" },
-              { name:"Y-T-W no chão", sets:"3x10–12", note:"Postura e escápulas" },
-              { name:"Rosca com mochila", sets:"3x8–12", note:"Carga progressiva (livros)" },
-              { name:"Bíceps isométrico (toalha)", sets:"3x20–30s", note:"Tensão constante" },
-              { name:"Dead bug", sets:"3x8–12/lado", note:"Core" }
-            ]
-          },
-          {
-            id:"C",
-            title:"Treino C",
-            subtitle:"Pernas / core (casa)",
-            plan:[
-              { name:"Agachamento (peso do corpo)", sets:"4x12–20", note:"Cadência • amplitude" },
-              { name:"Avanço (lunge)", sets:"3x10–14/lado", note:"Controle" },
-              { name:"Elevação pélvica (glute bridge)", sets:"4x10–20", note:"Pausa no topo" },
-              { name:"Panturrilha em pé", sets:"4x12–20", note:"Pico" },
-              { name:"Prancha", sets:"3x45–75s", note:"Respiração" },
-              { name:"Wall sit", sets:"2x45–90s", note:"Resistência" }
-            ]
-          }
-        ]
-      },
-      assessments: [],
-      ui: { tab: "dashboard" }
-    };
-
-    function loadProfile(){
-      try{
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if(!raw) return structuredClone(DEFAULT_PROFILE);
-        const p = JSON.parse(raw);
-
-        // merge simples + garantias
-        const merged = structuredClone(DEFAULT_PROFILE);
-        Object.assign(merged, p);
-        merged.user = Object.assign({}, DEFAULT_PROFILE.user, p.user||{});
-        merged.meta = Object.assign({}, DEFAULT_PROFILE.meta, p.meta||{});
-        merged.resources = Object.assign({}, DEFAULT_PROFILE.resources, p.resources||{});
-        merged.stats = Object.assign({}, DEFAULT_PROFILE.stats, p.stats||{});
-        merged.derived = Object.assign({}, DEFAULT_PROFILE.derived, p.derived||{});
-        merged.missions = Object.assign({}, DEFAULT_PROFILE.missions, p.missions||{});
-        merged.missions.items = (p.missions?.items || DEFAULT_PROFILE.missions.items).map(x=>({
-          id:x.id, label:x.label, done:!!x.done
-        }));
-        merged.workouts = Object.assign({}, DEFAULT_PROFILE.workouts, p.workouts||{});
-        merged.assessments = Array.isArray(p.assessments) ? p.assessments : [];
-        merged.ui = Object.assign({}, DEFAULT_PROFILE.ui, p.ui||{});
-        return merged;
-      }catch(e){
-        return structuredClone(DEFAULT_PROFILE);
-      }
-    }
-
-    function saveProfile(){
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    }
-
-    let state = loadProfile();
-
-    // -----------------------
-    // Ações
-    // -----------------------
-    function allMissionsDone(){
-      return state.missions.items.every(x=>x.done);
-    }
-
-    function completeDay(){
-      if(!allMissionsDone()) return;
-      state.meta.day += 1;
-      state.meta.lastCompletedDay = now();
-      state.resources.energy = clamp(state.resources.energy + 18, 0, 100);
-      state.resources.discipline = clamp(state.resources.discipline + 6, 0, 100);
-      state.missions.items = state.missions.items.map(it=>({ ...it, done:false }));
-      saveProfile();
-      renderAll();
-    }
-
-    function applyAssessment(a){
-      const score = scoreFromAssessment(a);
-      const rank = rankFromScore(score);
-      const stats = statsFromAssessment(a);
-      const discipline = disciplineFromAdherence(a.adherencePct);
-
-      const full = {
-        ...a,
-        derived: { score, rank, stats }
-      };
-
-      state.user.name = a.name || state.user.name;
-      state.meta.lastAssessmentAt = full.createdAt;
-      state.stats = stats;
-      state.resources.discipline = discipline;
-      state.derived.rank = rank;
-      state.derived.assessmentScore = score;
-      state.assessments = [full, ...state.assessments].slice(0, 52);
-
-      saveProfile();
-      renderAll();
-    }
-
-    function setTab(tab){
-      state.ui.tab = tab;
-      saveProfile();
-      renderAll();
-      window.scrollTo({top:0, behavior:"smooth"});
-    }
-
-    // -----------------------
-    // Render
-    // -----------------------
-    const $ = (id)=>document.getElementById(id);
-
-    function setHeader(tab){
-      const title = $("page-title");
-      const sub = $("page-sub");
-      const stamp = $("stamp");
-      const actions = $("header-actions");
-      actions.innerHTML = "";
-
-      stamp.textContent = todayLabel();
-
-      if(tab==="dashboard"){
-        title.textContent = "Dashboard";
-        sub.textContent = "Sistema de evolução pessoal.";
-        const due = isWeeklyDue(state.meta.lastAssessmentAt);
-        if(due){
-          const b = document.createElement("button");
-          b.className = "btn";
-          b.textContent = "Fazer check-in";
-          b.onclick = ()=>setTab("assessment");
-          actions.appendChild(b);
-        }
-      }
-      if(tab==="missions"){
-        title.textContent = "Missão diária";
-        sub.textContent = "Consistência antes de intensidade.";
-      }
-      if(tab==="workouts"){
-        title.textContent = "Treinos";
-        sub.textContent = "Em casa. Execução limpa. Progresso real.";
-      }
-      if(tab==="assessment"){
-        title.textContent = "Questionário semanal";
-        sub.textContent = "Atualiza rank e registra evolução.";
-      }
-      if(tab==="widget"){
-        title.textContent = "Widget";
-        sub.textContent = "Mini sistema embutível.";
-      }
-    }
-
-    function renderSidebar(){
-      $("side-name").textContent = state.user.name;
-      $("side-rank").textContent = state.derived.rank;
-
-      const due = isWeeklyDue(state.meta.lastAssessmentAt);
-      $("tab-assessment-label").textContent = due ? "Check-in (pendente)" : "Check-in";
-    }
-
-    function renderDashboard(){
-      $("kpi-day").textContent = String(state.meta.day);
-      $("kpi-score").textContent = String(state.derived.assessmentScore);
-
-      $("energy-pct").textContent = `${state.resources.energy}%`;
-      $("disc-pct").textContent = `${state.resources.discipline}%`;
-      $("energy-bar").style.width = `${clamp(state.resources.energy,0,100)}%`;
-      $("disc-bar").style.width = `${clamp(state.resources.discipline,0,100)}%`;
-
-      $("st-strength").textContent = String(state.stats.strength);
-      $("st-endurance").textContent = String(state.stats.endurance);
-      $("st-agility").textContent = String(state.stats.agility);
-      $("st-vitality").textContent = String(state.stats.vitality);
-
-      const latest = state.assessments[0] || null;
-      const prev = state.assessments[1] || null;
-      const delta = (latest && prev) ? (latest.derived.score - prev.derived.score) : null;
-
-      $("kpi-checkins").textContent = String(state.assessments.length);
-      $("kpi-delta").textContent = (delta===null) ? "—" : (delta>=0 ? `+${delta}` : String(delta));
-      $("kpi-last").textContent = state.meta.lastAssessmentAt ? `${daysBetween(now(), state.meta.lastAssessmentAt)}d` : "—";
-
-      $("btn-complete").disabled = !allMissionsDone();
-    }
-
-    function renderMissions(){
-      $("ms-day").textContent = `Dia ${state.meta.day}`;
-      $("ms-energy").textContent = `${state.resources.energy}%`;
-      $("ms-disc").textContent = `${state.resources.discipline}%`;
-
-      const list = $("task-list");
-      list.innerHTML = "";
-
-      state.missions.items.forEach(it=>{
-        const row = document.createElement("div");
-        row.className = "task" + (it.done ? " done" : "");
-        row.onclick = ()=>{
-          it.done = !it.done;
-          saveProfile();
-          renderMissions();
-          renderDashboard();
-          renderWidget();
-        };
-
-        const left = document.createElement("div");
-        left.className = "left";
-        const chk = document.createElement("div");
-        chk.className = "chk";
-        const inner = document.createElement("i");
-        chk.appendChild(inner);
-
-        const label = document.createElement("div");
-        label.className = "label";
-        label.textContent = it.label;
-
-        left.appendChild(chk);
-        left.appendChild(label);
-
-        const st = document.createElement("div");
-        st.className = "status";
-        st.textContent = it.done ? "Concluída" : "Pendente";
-
-        row.appendChild(left);
-        row.appendChild(st);
-
-        list.appendChild(row);
-      });
-
-      const doneCount = state.missions.items.filter(x=>x.done).length;
-      const pct = Math.round((doneCount / state.missions.items.length)*100);
-      $("ms-progress").textContent = `${pct}%`;
-      $("ms-bar").style.width = `${pct}%`;
-
-      $("ms-complete").disabled = !allMissionsDone();
-    }
-
-    function renderWorkouts(){
-      const cards = $("workout-cards");
-      cards.innerHTML = "";
-      state.workouts.items.forEach(w=>{
-        const b = document.createElement("button");
-        b.className = "wcard" + (state.workouts.activeId===w.id ? " active" : "");
-        b.innerHTML = `
-          <div class="t">${w.title}</div>
-          <div class="s">${w.subtitle}</div>
-          <div class="d">${w.plan.length} exercícios • foco em qualidade</div>
-        `;
-        b.onclick = ()=>{
-          state.workouts.activeId = w.id;
-          saveProfile();
-          renderWorkouts();
-        };
-        cards.appendChild(b);
-      });
-
-      const active = state.workouts.items.find(x=>x.id===state.workouts.activeId) || null;
-      const detail = $("workout-detail");
-      if(!active){
-        detail.hidden = true;
-        return;
-      }
-      detail.hidden = false;
-      $("wd-kicker").textContent = "Plano selecionado";
-      $("wd-title").textContent = `${active.title} — ${active.subtitle}`;
-      $("wd-sub").textContent = "Progrida com reps, tempo sob tensão ou carga (mochila). Execução limpa.";
-
-      const exBox = $("workout-exercises");
-      exBox.innerHTML = "";
-      active.plan.forEach(ex=>{
-        const row = document.createElement("div");
-        row.className = "ex";
-        row.innerHTML = `
-          <div>
-            <div class="nm">${ex.name}</div>
-            <div class="nt">${ex.note}</div>
-          </div>
-          <div>
-            <div class="k">Séries</div>
-            <div class="v mono">${ex.sets}</div>
-          </div>
-          <div>
-            <div class="k">Status</div>
-            <div class="v">Pronto</div>
-          </div>
-        `;
-        exBox.appendChild(row);
-      });
-    }
-
-    function prefillAssessmentForm(){
-      const latest = state.assessments[0] || null;
-
-      $("f-name").value = latest ? (latest.name || state.user.name) : state.user.name;
-      $("f-level").value = latest ? latest.level : "iniciante";
-      $("f-age").value = latest ? latest.age : "";
-      $("f-height").value = latest ? latest.heightCm : "";
-      $("f-weight").value = latest ? latest.weightKg : "";
-      $("f-adh").value = latest ? latest.adherencePct : 0;
-
-      $("f-push").value = latest ? latest.tests.pushups : 0;
-      $("f-squat").value = latest ? latest.tests.squats : 0;
-      $("f-plank").value = latest ? latest.tests.plankSec : 0;
-      $("f-cardio").value = latest ? latest.tests.cardioMin : 0;
-      $("f-notes").value = "";
-    }
-
-    function readAssessmentForm(){
-      return {
-        id: uuid(),
-        weekStart: startOfISOWeek(now()),
-        createdAt: now(),
-        name: String($("f-name").value || "").trim(),
-        level: $("f-level").value,
-        age: Number($("f-age").value || 0),
-        heightCm: Number($("f-height").value || 0),
-        weightKg: Number($("f-weight").value || 0),
-        adherencePct: clamp(Number($("f-adh").value || 0), 0, 100),
-        tests: {
-          pushups: clamp(Number($("f-push").value || 0), 0, 999),
-          squats: clamp(Number($("f-squat").value || 0), 0, 999),
-          plankSec: clamp(Number($("f-plank").value || 0), 0, 99999),
-          cardioMin: clamp(Number($("f-cardio").value || 0), 0, 999)
-        },
-        notes: String($("f-notes").value || "").trim()
-      };
-    }
-
-    function renderAssessment(){
-      const due = isWeeklyDue(state.meta.lastAssessmentAt);
-      $("assess-note").textContent = due
-        ? "Check-in pendente: complete o questionário para atualizar rank e registrar evolução."
-        : "Você pode atualizar a qualquer momento; o sistema usa o último check-in.";
-
-      // live compute
-      const a = readAssessmentForm();
-      const score = scoreFromAssessment(a);
-      const rank = rankFromScore(score);
-      const disc = disciplineFromAdherence(a.adherencePct);
-
-      $("a-score").textContent = String(score);
-      $("a-rank").textContent = rank;
-      $("a-disc").textContent = `${disc}%`;
-
-      // validação
-      const canSubmit = a.name.length>0 && a.age>0 && a.heightCm>0 && a.weightKg>0;
-      $("btn-save-checkin").disabled = !canSubmit;
-
-      // histórico
-      const hist = $("hist");
-      hist.innerHTML = "";
-      state.assessments.slice(0, 18).forEach(item=>{
-        const week = new Date(item.weekStart);
-        const wk = `${String(week.getDate()).padStart(2,"0")}/${String(week.getMonth()+1).padStart(2,"0")}/${week.getFullYear()}`;
-        const el = document.createElement("div");
-        el.className = "hitem";
-        el.innerHTML = `
-          <div class="a">
-            <div class="wk">Semana ${wk}</div>
-            <div class="sc">Rank ${item.derived.rank} • Score ${item.derived.score}</div>
-            <div class="sm">Flexões ${item.tests.pushups} • Agach ${item.tests.squats} • Prancha ${item.tests.plankSec}s • Cardio ${item.tests.cardioMin}m</div>
-          </div>
-          <div class="b">
-            <div class="wk">Disciplina</div>
-            <div class="sc mono">${disciplineFromAdherence(item.adherencePct)}%</div>
-          </div>
-        `;
-        hist.appendChild(el);
-      });
-    }
-
-    function renderWidget(){
-      const doneCount = state.missions.items.filter(x=>x.done).length;
-      const pct = Math.round((doneCount / state.missions.items.length)*100);
-
-      $("w-day").textContent = `Dia ${state.meta.day}`;
-      $("w-energy").textContent = `Energia ${state.resources.energy}%`;
-      $("w-rank").textContent = state.derived.rank;
-
-      $("w-progress").textContent = `${pct}%`;
-      $("w-bar").style.width = `${pct}%`;
-
-      const list = $("w-list");
-      list.innerHTML = "";
-      state.missions.items.slice(0,3).forEach(it=>{
-        const row = document.createElement("div");
-        row.className = "wrow";
-        row.innerHTML = `
-          <div class="l">
-            <div class="chk"><i style="background:${it.done ? "rgba(255,255,255,.30)" : "rgba(255,255,255,.0)"}"></i></div>
+          <div class="grid cols2" style="margin-top:12px">
             <div>
-              <div class="t">${it.label}</div>
-              <div class="s">${it.done ? "OK" : "Pendente"}</div>
+              <div class="sectionK"><span class="dot">▣</span><span>Checklist</span></div>
+              <div style="display:grid;gap:10px;margin-top:12px" id="task-list"></div>
             </div>
-          </div>
-          <div class="s mono">${it.done ? "1" : "0"}</div>
-        `;
-        row.onclick = ()=>{
-          it.done = !it.done;
-          saveProfile();
-          renderMissions();
-          renderDashboard();
-          renderWidget();
-        };
-        list.appendChild(row);
-      });
 
-      $("w-complete").disabled = !allMissionsDone();
-      const due = isWeeklyDue(state.meta.lastAssessmentAt);
-      $("w-checkin").textContent = due ? "Check-in" : "Revisar";
-    }
+            <div>
+              <div class="sectionK"><span class="dot">⟡</span><span>Progresso</span></div>
+              <div style="margin-top:12px">
+                <div class="barLine"><div class="l">Missão</div><div class="r" id="ms-pct"></div></div>
+                <div class="bar"><i id="ms-bar"></i></div>
+              </div>
 
-    function renderTabs(){
-      const tab = state.ui.tab;
-
-      document.querySelectorAll(".nav button").forEach(b=>{
-        b.classList.toggle("active", b.dataset.tab===tab);
-      });
-
-      $("page-dashboard").hidden = tab!=="dashboard";
-      $("page-missions").hidden = tab!=="missions";
-      $("page-workouts").hidden = tab!=="workouts";
-      $("page-assessment").hidden = tab!=="assessment";
-      $("page-widget").hidden = tab!=="widget";
-
-      setHeader(tab);
-
-      // onboarding: se nunca teve check-in, leva pro questionário
-      if(state.assessments.length===0 && tab!=="assessment"){
-        // sem loop infinito
-        state.ui.tab = "assessment";
-        saveProfile();
-        renderTabs();
-        return;
-      }
-    }
-
-    function renderAll(){
-      renderSidebar();
-      renderTabs();
-      renderDashboard();
-      renderMissions();
-      renderWorkouts();
-      renderWidget();
-      // assessment precisa de prefill se entrar
-      if(state.ui.tab==="assessment"){
-        // se inputs vazios (primeiro load), prefill
-        if(!$("f-name").value) prefillAssessmentForm();
-        renderAssessment();
-      }
-    }
-
-    // -----------------------
-    // Eventos
-    // -----------------------
-    document.querySelectorAll(".nav button").forEach(b=>{
-      b.addEventListener("click", ()=> setTab(b.dataset.tab));
-    });
-
-    $("btn-edit-name").onclick = ()=>{
-      const name = prompt("Nome do usuário:", state.user.name);
-      if(!name) return;
-      state.user.name = name.trim();
-      saveProfile();
-      renderAll();
-    };
-
-    $("btn-reset").onclick = ()=>{
-      const ok = confirm("Resetar progresso local?");
-      if(!ok) return;
-      localStorage.removeItem(STORAGE_KEY);
-      state = loadProfile();
-      renderAll();
-    };
-
-    $("btn-boost").onclick = ()=>{
-      state.resources.energy = clamp(state.resources.energy + 5, 0, 100);
-      saveProfile(); renderAll();
-    };
-    $("btn-effort").onclick = ()=>{
-      state.resources.energy = clamp(state.resources.energy - 5, 0, 100);
-      saveProfile(); renderAll();
-    };
-
-    $("btn-go-assessment").onclick = ()=> setTab("assessment");
-    $("btn-complete").onclick = ()=> completeDay();
-
-    $("ms-complete").onclick = ()=> completeDay();
-
-    $("wd-close").onclick = ()=>{
-      state.workouts.activeId = null;
-      saveProfile();
-      renderWorkouts();
-    };
-
-    // assessment live compute
-    ["f-name","f-level","f-age","f-height","f-weight","f-adh","f-push","f-squat","f-plank","f-cardio","f-notes"].forEach(id=>{
-      $(id).addEventListener("input", ()=> renderAssessment());
-      $(id).addEventListener("change", ()=> renderAssessment());
-    });
-
-    $("assessment-form").addEventListener("submit", (e)=>{
-      e.preventDefault();
-      const a = readAssessmentForm();
-      const canSubmit = a.name.length>0 && a.age>0 && a.heightCm>0 && a.weightKg>0;
-      if(!canSubmit) return;
-
-      applyAssessment(a);
-      setTab("dashboard");
-    });
-
-    $("btn-back-dash").onclick = ()=> setTab("dashboard");
-
-    $("w-complete").onclick = ()=> completeDay();
-    $("w-checkin").onclick = ()=> setTab("assessment");
-
-    // -----------------------
-    // Init
-    // -----------------------
-    // prefill assessment inputs once
-    prefillAssessmentForm();
-    renderAll();
-  </script>
-</body>
-</html>
+              <button cl
